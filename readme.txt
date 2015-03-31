@@ -1,10 +1,10 @@
 === Simply Show Hooks ===
 Contributors: stuartobrien, cxThemes
-Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9QVMKC7F8JNVA
+Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SDPYLC54KALRL
 Tags: hook, action, filter, add, do, add_action, add_filter, do_action, apply_filter, developer, code, find, admin
 Requires at least: 3
-Tested up to: 3.4
-Stable tag: 1
+Tested up to: 4.1
+Stable tag: 1.0.0
 
 Simply Show Hooks helps theme and plugin developers to quickly see where all the action and filter hooks are on any WordPress page.
 
