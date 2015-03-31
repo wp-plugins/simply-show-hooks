@@ -6,14 +6,15 @@ Requires at least: 3
 Tested up to: 3.4
 Stable tag: 1
 
-Simply Show Hooks helps theme or plugin developers to quickly see where all the action hooks are on any WordPress page.
+Simply Show Hooks helps theme and plugin developers to quickly see where all the action and filter hooks are on any WordPress page.
 
 == Description ==
 
 Up until now the way theme and plugin developers find where to hook into with their add_action() and add_filter() functions is either to search through the WordPress code base, or find find a reference to the hook in the codex.
 
-What Simply Show Hooks does is give you a quicker way to see these hooks by displaying theme in-line on the page that you are on. All that's left to do then is copy the hook you need, and paste it in to your add_action and add_filter functions like this:
-add_action( 'wp_enqueue_scripts', 'your_enqueue_function' );
+What Simply Show Hooks does is give you a simpler way to see these hooks by displaying them in-line on the page that you are on. All that's left to do then is copy the hook you need, and paste it in to your add_action and add_filter functions like this:
+add_action( 'wp_enqueue_scripts', 'my_enqueue_scripts_action' );
+add_filter( 'the_title', 'my_the_title_filter' );
 
 I made this plugin so I could find WordPress hooks quicker and I use it all the time, so I thought I'd share it and see if it could help others.
 
