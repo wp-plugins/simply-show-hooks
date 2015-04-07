@@ -4,7 +4,7 @@ Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: hook, action, filter, add, do, add_action, add_filter, do_action, apply_filter, developer, code, find, admin
 Requires at least: 3
 Tested up to: 4.1
-Stable tag: 1.1.0
+Stable tag: 1.0.0
 
 Simply Show Hooks helps theme and plugin developers to quickly see where all the action and filter hooks are on any WordPress page.
 
@@ -39,10 +39,9 @@ Please note that in odd cases, due to the nature of actions and filters, the plu
 == Changelog ==
 
 = 1.0.0 =
-* Initial release.
+* Initial release
 
-= 1.1.0 =
-* Added 'Show Action & Filter Hooks' that shows all the Actions and Filters in a Sidebar.
-* Added a hook name heading to the dropdown menu to easier identify, copy and use the hooks.
-* Added an A and F to identify whether a hook is an Actions and Filter.
-* Changed the color of the Actions and Filters hook markers.
+== Upgrade Notice ==
+
+= 1.0.0 =
+Please upgrade.
