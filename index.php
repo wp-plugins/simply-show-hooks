@@ -3,8 +3,8 @@
 Plugin Name: Simply Show Hooks
 Plugin URI: http://www.calyxagency.com/#plugins
 Description: Simply Show Hooks helps theme or plugin developers to quickly see where all the action and filter hooks are on any WordPress page.
-Version: 1.0.0
-Author: Stuart O'Brien, cxThemes
+Version: 1.1.0
+Author: stuartobrien, cxThemes
 Author URI: http://www.calyxagency.com/#plugins
 License: GPLv2 or later
 Text Domain: simply-show-hooks
@@ -20,10 +20,6 @@ class Simply_Show_Hooks {
 	private $status;
 	
 	private $all_hooks = array();
-	
-	private $all_filter_hooks = array();
-	
-	private $all_action_hooks = array();
 	
 	private $recent_hooks = array();
 	
@@ -215,12 +211,12 @@ class Simply_Show_Hooks {
 		global $wp_scripts, $current_screen;
 		
 		// Main Styles
-		wp_register_style( 'ssh-main-css', plugins_url( basename( plugin_dir_path( __FILE__ ) ) . '/assets/css/ssh-main.css', basename( __FILE__ ) ), '', '1.0.0', 'screen' );
+		wp_register_style( 'ssh-main-css', plugins_url( basename( plugin_dir_path( __FILE__ ) ) . '/assets/css/ssh-main.css', basename( __FILE__ ) ), '', '1.1.0', 'screen' );
 		wp_enqueue_style( 'ssh-main-css' );
 
 		// Main Scripts
 		/*
-		wp_register_script( 'ssh-main-js', plugins_url( basename( plugin_dir_path( __FILE__ ) ) . '/assets/js/ssh-main.js', basename( __FILE__ ) ), array('jquery') );
+		wp_register_script( 'ssh-main-js', plugins_url( basename( plugin_dir_path( __FILE__ ) ) . '/assets/js/ssh-main.js', basename( __FILE__ ) ), array('jquery'), '1.1.0' );
 		wp_enqueue_script( 'ssh-main-js' );
 		wp_localize_script('ssh-main-js', 'ssh-main-js', array(
 			'home_url' => get_home_url(),
@@ -258,9 +254,9 @@ class Simply_Show_Hooks {
 	 */
 	function render_hooks() {
 		
-		foreach ( $this->all_hooks as $nested_key => $nested_value ) {
+		foreach ( $this->all_hooks as $nested_value ) {
 			
-			if ( 'action' == $nested_value[2] ) {
+			if ( 'action' == $nested_value['type'] ) {
 				
 				$this->render_action( $nested_value );
 			}
@@ -279,16 +275,23 @@ class Simply_Show_Hooks {
 			
 			if ( isset( $wp_actions[$hook] ) ) {
 				
-				// Record all Actions
-				$this->all_hooks[] = array( $hook, false, 'action' );
+				// Action
+				$this->all_hooks[] = array(
+					'ID'       => $hook,
+					'callback' => false,
+					'type'     => 'action',
+				);
 			}
-			else{
+			else {
 				
-				// Record all Filters
-				$this->all_hooks[] = array( $hook, false, 'filter' );
+				// Filter
+				$this->all_hooks[] = array(
+					'ID'       => $hook,
+					'callback' => false,
+					'type'     => 'filter',
+				);
 			}
 		}
-		
 		
 		//if ( isset( $wp_actions[$hook] ) && $wp_actions[$hook] == 1 && !in_array( $hook, $this->ignore_hooks ) ) {
 		//if (  ( isset( $wp_actions[$hook] ) || isset( $wp_filter[$hook] ) ) && !in_array( $hook, $this->ignore_hooks ) ) {
@@ -321,12 +324,12 @@ class Simply_Show_Hooks {
 	 *
 	 * Render action
 	 */
-	function render_action( $data = array() ) {
+	function render_action( $args = array() ) {
 		
 		global $wp_filter;
 		
 		// Get all the nested hooks
-		$nested_hooks = ( isset( $wp_filter[ $data[0] ] ) ) ? $wp_filter[ $data[0] ] : false ;
+		$nested_hooks = ( isset( $wp_filter[ $args['ID'] ] ) ) ? $wp_filter[ $args['ID'] ] : false ;
 		
 		// Count the number of functions on this hook
 		$nested_hooks_count = 0;
@@ -336,12 +339,26 @@ class Simply_Show_Hooks {
 			}
 		}
 		?>
-		<span style="display:none;" class="ssh-hook ssh-hook-<?php echo $data[2] ?> <?php echo ( $nested_hooks ) ? 'ssh-hook-has-hooks' : '' ; ?>" >
+		<span style="display:none;" class="ssh-hook ssh-hook-<?php echo $args['type'] ?> <?php echo ( $nested_hooks ) ? 'ssh-hook-has-hooks' : '' ; ?>" >
+			
+			<?php
+			if ( 'action' == $args['type'] ) {
+				?>
+				<span class="ssh-hook-type ssh-hook-type">A</span>
+				<?php
+			}
+			else if ( 'filter' == $args['type'] ) {
+				?>
+				<span class="ssh-hook-type ssh-hook-type">F</span>
+				<?php
+			}
+			?>
+			
 			<?php
 			
 			// Main - Write the action hook name.
-			//echo esc_html( $data[0] );
-			echo $data[0];
+			//echo esc_html( $args['ID'] );
+			echo $args['ID'];
 			
 			// @TODO - Caller function testing.
 			if ( isset( $extra_data[1] ) && FALSE !== $extra_data[1] ) {
@@ -361,13 +378,17 @@ class Simply_Show_Hooks {
 			}
 			
 			// Write out list of all the function hooked to an action.
-			if ( isset( $wp_filter[$data[0]] ) ):
+			if ( isset( $wp_filter[$args['ID']] ) ):
 				
-				$nested_hooks = $wp_filter[$data[0]];
+				$nested_hooks = $wp_filter[$args['ID']];
 				
 				if ( $nested_hooks ):
 					?>
 					<ul class="ssh-hook-dropdown">
+						
+						<li class="ssh-hook-heading">
+							<strong>action:</strong> <?php echo $args['ID']; ?>
+						</li>
 						
 						<?php
 						foreach ( $nested_hooks as $nested_key => $nested_value ) :
@@ -375,7 +396,7 @@ class Simply_Show_Hooks {
 							// Show the priority number if the following hooked functions
 							?>
 							<li class="ssh-priority">
-								<span class="ssh-priority-label"><strong><?php echo 'Priority'; /* _e('Priority', 'simply-show-hooks') */ ?></strong> <?php echo $nested_key ?></span>
+								<span class="ssh-priority-label"><strong><?php echo 'Priority:'; /* _e('Priority', 'simply-show-hooks') */ ?></strong> <?php echo $nested_key ?></span>
 							</li>
 							<?php
 							
@@ -449,7 +470,19 @@ class Simply_Show_Hooks {
 		?>
 		<div class="ssh-nested-hooks-block <?php echo ( 'show-filter-hooks' == $this->status ) ? 'ssh-active' : '' ; ?> ">
 			<?php
-			foreach ( $this->all_hooks as $va_nested_key => $va_nested_value ) {
+			foreach ( $this->all_hooks as $va_nested_value ) {
+				
+				if ( 'action' == $va_nested_value['type'] || 'filter' == $va_nested_value['type'] ) {
+					$this->render_action( $va_nested_value );
+				}
+				else{
+					?>
+					<div class="ssh-collection-divider">
+						<?php echo $va_nested_value['ID'] ?>
+					</div>
+					<?php
+				}
+				
 				/*
 				?>
 				<div class="va-action">
@@ -457,29 +490,7 @@ class Simply_Show_Hooks {
 				</div>
 				<?php
 				*/
-				
-				if ( 'action' == $va_nested_value[2] || 'filter' == $va_nested_value[2] ) {
-					$this->render_action( $va_nested_value );
-				}
-				else{
-					?>
-					<div class="ssh-collection-divider">
-						<?php echo $va_nested_value[0] ?>
-					</div>
-					<?php
-				}
 			}
-			?>
-		</div>
-		<?php
-		
-		// Testing
-		return false;
-		?>
-		<div style="padding-left: 190px; font-size:13px;">
-			<?php
-			s( $wp_filter );
-			s( $wp_actions );
 			?>
 		</div>
 		<?php

@@ -6,7 +6,7 @@
 	float: none !important;
 	min-width: 0px !important;
 	min-height: 0px !important;
-	border: 1px solid rgba(0, 0, 0, 0.14) !important;
+	border: 1px solid rgba(0, 0, 0, 0.15) !important;
 	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.1) inset, 0px 1px 1px rgba(0, 0, 0, 0.15) !important;
 	color: #EEEEEE !important;
 	text-decoration: none !important;
@@ -24,22 +24,57 @@
 	white-space: nowrap !important;
 	box-sizing: initial !important;
 }
-.ssh-hook.ssh-hook-has-hooks {
-	cursor: pointer;
-	color: #F6F6F6 !important;
-}
-
 .ssh-hook.ssh-hook-action {
-	background: #424242 !important;
+	background: #D1E8E0 !important;
+	color: #2E2E2E !important;
+	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px 1px rgba(0, 0, 0, 0.05) !important;
 }
 .ssh-hook.ssh-hook-filter {
-	background: #7A5560 !important;
+	background: #E8D8D3 !important;
+	color: #3A2D2D !important;
+	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px 1px rgba(0, 0, 0, 0.05) !important;
+}
+.ssh-hook .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.13) !important;
+	border-radius: 30px !important;
+	min-width: 11px !important;
+	line-height: 11px !important;
+	padding-top: 0px !important;
+	display: inline-block !important;
+	text-align: center !important;
+	color: rgba(8, 8, 8, 0.9) !important;
+	font-size: 9px !important;
+	margin: 0px !important;
+	float: none !important;
+}
+.ssh-hook.ssh-hook-action .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.2) !important;
+	color: rgba(199, 255, 212, 1) !important;
+}
+.ssh-hook.ssh-hook-filter .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.15) !important;
+	color: #F4E1E1 !important;
+}
+.ssh-hook.ssh-hook-action.ssh-hook-has-hooks .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.2) !important;
+	color: #4DCCA8 !important;
+}
+.ssh-hook.ssh-hook-filter.ssh-hook-has-hooks .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.25) !important;
+	color: rgba(196, 131, 131, 1) !important;
+}
+.ssh-hook.ssh-hook-has-hooks {
+	cursor: pointer;
 }
 .ssh-hook.ssh-hook-action.ssh-hook-has-hooks {
 	background: #34B08D !important;
+	color: #F6F6F6 !important;
+	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px 1px rgba(0, 0, 0, 0.17) !important;
 }
 .ssh-hook.ssh-hook-filter.ssh-hook-has-hooks {
-	background: #34B08D !important;
+	background: #AB325B !important;
+	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px 1px rgba(0, 0, 0, 0.17) !important;
+	color: #FFF !important;
 }
 
 .ssh-hook .ssh-hook-count {
@@ -133,6 +168,10 @@
 	transition: .5s !important;
 	white-space: nowrap !important;
 }
+.ssh-hook.ssh-hook-filter ul.ssh-hook-dropdown li span.ssh-function-string {
+	box-shadow: 0px 1px 0 rgba(255, 255, 255, 0.2) inset, 0px 1px 1px rgba(0, 0, 0, 0.2) !important;
+	background: #AB325B !important;
+}
 .ssh-hook ul.ssh-hook-dropdown li span:before {
 	display: none !important;
 }
@@ -148,6 +187,15 @@
 	clear: both;
 	width: auto !important;
 	float: none !important;
+}
+.ssh-hook ul.ssh-hook-dropdown li.ssh-hook-heading {
+	padding: 1px 0;
+	background: rgba(231, 231, 231, 0.46);
+	margin: 10px 0 20px;
+	font-size: 13px;
+	padding: 12px 9px;
+	border: 1px solid rgba(0, 0, 0, 0.07);
+	border-radius: 3px;
 }
 .ssh-hook ul.ssh-hook-dropdown li.ssh-priority {
 	display:block;
@@ -292,12 +340,13 @@
 	left: 0;
 	top: 0;
 	z-index: 100000;
-	width: 400px;
+	width: 385px;
 	height: 100%;
 	overflow-y: scroll;
 	overflow-x: hidden;
-	box-shadow: 0 1px 15px rgba(0, 0, 0, 0.3);
+	box-shadow: 6px 0px 0px rgba(0, 0, 0, 0.05), 0 1px 15px rgba(0, 0, 0, 0.3);
 	border-right: 1px solid rgba(0, 0, 0, 0.24);
+	padding: 3px;
 }
 .ssh-nested-hooks-block.ssh-active {
 	display:block;
