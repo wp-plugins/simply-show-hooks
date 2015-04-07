@@ -387,7 +387,7 @@ class Simply_Show_Hooks {
 					<ul class="ssh-hook-dropdown">
 						
 						<li class="ssh-hook-heading">
-							<strong>action:</strong> <?php echo $args['ID']; ?>
+							<strong><?php echo $args['type'] ?>:</strong> <?php echo $args['ID']; ?>
 						</li>
 						
 						<?php
