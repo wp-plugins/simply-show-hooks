@@ -3,7 +3,7 @@
 Plugin Name: Simply Show Hooks
 Plugin URI: http://www.calyxagency.com/#plugins
 Description: Simply Show Hooks helps theme or plugin developers to quickly see where all the action and filter hooks are on any WordPress page.
-Version: 1.0.0
+Version: 1.1.0
 Author: Stuart O'Brien, cxThemes
 Author URI: http://www.calyxagency.com/#plugins
 License: GPLv2 or later
@@ -19,14 +19,14 @@ class Simply_Show_Hooks {
 	
 	private $status;
 	
-	private $hooks_collection = array();
+	private $all_hooks = array();
 	
-	/**
-	 * Use this to set any tags known to cause problems.
-	 * and won't be missed
-	 */
+	private $recent_hooks = array();
 	
-	private $ignore_hooks;
+	private $ignore_hooks = array();
+	
+	private $doing = 'collect';
+	
 
 	/**
 	*  Instantiator
@@ -51,8 +51,15 @@ class Simply_Show_Hooks {
 	
 	function init() {
 		
-		// Ignore these hooks know to cause problems
-		$this->ignore_hooks = apply_filters( 'ssh_ignore_hooks', array( 'attribute_escape', 'body_class', 'the_post', 'post_edit_form_tag' ) );
+		// Use this to set any tags known to cause display problems.
+		// Will be display in sidebar.
+		$this->ignore_hooks = apply_filters( 'ssh_ignore_hooks', array(
+			'attribute_escape',
+			'body_class',
+			'the_post',
+			'post_edit_form_tag',
+			//'gettext',
+		) );
 
 		// Translations
 		add_action( 'plugins_loaded', array( $this, 'load_translation' ) );
@@ -73,15 +80,100 @@ class Simply_Show_Hooks {
 				$this->status = $_COOKIE['ssh_status'];
 			}
 			else{
-				$this->status = "off";
+				$this->status = 'off';
 			}
 		}
 		
-		if ( $this->status == 'show' || $this->status == 'show-nested' ) {
+		if ( $this->status == 'show-action-hooks' || $this->status == 'show-filter-hooks' ) {
 			
+			add_filter( 'all', array( $this, 'hook_all_hooks' ), 100 );
 			add_action( 'shutdown', array( $this, 'notification_switch' ) );
-			add_action( 'all', array( $this, 'build_hooks_collection' ), 1 );
+			
+			add_action( 'shutdown', array( $this, 'filter_hooks_panel' ) );
 		}
+	}
+	
+	/*
+	 * Admin Menu top bar
+	 */
+	function admin_bar_menu( $wp_admin_bar ) {
+		
+		if ( 'show-action-hooks' == $this->status ) {
+			
+			$title 	= __( 'Hide Action Hooks' , 'simply-show-hooks' );
+			$href 	= '?ssh-hooks=off';
+			$css 	= 'ssh-hooks-on ssh-hooks-normal';
+		}
+		else {
+			
+			$title 	= __( 'Show Action Hooks' , 'simply-show-hooks' );
+			$href 	= '?ssh-hooks=show-action-hooks';
+			$css 	= '';
+		}
+		
+		$wp_admin_bar->add_menu(array(
+			'title'		=> '<span class="ab-icon"></span><span class="ab-label">' . __( 'Simply Show Hooks' , 'simply-show-hooks' ) . '</span>',
+			'id'		=> 'ssh-main-menu',
+			'parent'	=> false,
+			'href'		=> $href,
+		));
+		
+		$wp_admin_bar->add_menu(array(
+			'title'		=> $title,
+			'id'		=> 'ssh-simply-show-hooks',
+			'parent'	=> 'ssh-main-menu',
+			'href'		=> $href,
+			'meta'		=> array( 'class' => $css )
+		));
+		
+		
+		if ( $this->status=="show-filter-hooks" ) {
+			
+			$title	= 'Hide Action & Filter Hooks';
+			$href	= '?ssh-hooks=off';
+			$css 	= 'ssh-hooks-on ssh-hooks-sidebar';
+		}
+		else {
+			
+			$title	= 'Show Action & Filter Hooks';
+			$href	= '?ssh-hooks=show-filter-hooks';
+			$css 	= '';
+		}
+		
+		$wp_admin_bar->add_menu(array(
+			'title'		=> $title,
+			'id'		=> 'ssh-show-all-hooks',
+			'parent'	=> 'ssh-main-menu',
+			'href'		=> $href,
+			'meta'		=> array( 'class' => $css )
+		));
+	}
+	
+	// Custom css to add icon to admin bar edit button.
+	function add_builder_edit_button_css() {
+		?>
+		<style>
+		#wp-admin-bar-ssh-main-menu .ab-icon:before{
+			font-family: "dashicons" !important;
+			content: "\f323" !important;
+			font-size: 16px !important;
+		}
+		</style>
+		<?php
+	}
+
+	/*
+	 * Notification Switch
+	 * Displays notification interface that will alway display
+	 * even if the interface is corrupted in other places.
+	 */
+	function notification_switch() {
+		?>
+		<a class="ssh-notification-switch" href="?ssh-hooks=off" >
+			<span class="ssh-notification-indicator"></span>
+			<?php echo 'Hide Hooks' ; // _e( 'Hide Hooks' , 'simply-show-hooks' ) ?>
+		</a>
+		<?php
 	}
 	
 	function wp_init() {
@@ -100,7 +192,7 @@ class Simply_Show_Hooks {
 		add_action( 'wp_print_styles', array( $this, 'add_builder_edit_button_css' ) );
 		add_action( 'admin_print_styles', array( $this, 'add_builder_edit_button_css' ) );
 		
-		if ( $this->status == 'show' || $this->status == 'show-nested' ) {
+		if ( $this->status == 'show-action-hooks' || $this->status == 'show-filter-hooks' ) {
 			
 			//Final hook - render the nested action array
 			add_action( 'admin_head', array( $this, 'render_head_hooks'), 100 ); // Back-end - Admin
@@ -119,12 +211,12 @@ class Simply_Show_Hooks {
 		global $wp_scripts, $current_screen;
 		
 		// Main Styles
-		wp_register_style( 'ssh-main-css', plugins_url( basename( plugin_dir_path( __FILE__ ) ) . '/assets/css/ssh-main.css', basename( __FILE__ ) ), '', '1.0.0', 'screen' );
+		wp_register_style( 'ssh-main-css', plugins_url( basename( plugin_dir_path( __FILE__ ) ) . '/assets/css/ssh-main.css', basename( __FILE__ ) ), '', '1.1.0', 'screen' );
 		wp_enqueue_style( 'ssh-main-css' );
 
 		// Main Scripts
 		/*
-		wp_register_script( 'ssh-main-js', plugins_url( basename( plugin_dir_path( __FILE__ ) ) . '/assets/js/ssh-main.js', basename( __FILE__ ) ), array('jquery') );
+		wp_register_script( 'ssh-main-js', plugins_url( basename( plugin_dir_path( __FILE__ ) ) . '/assets/js/ssh-main.js', basename( __FILE__ ) ), array('jquery'), '1.1.0' );
 		wp_enqueue_script( 'ssh-main-js' );
 		wp_localize_script('ssh-main-js', 'ssh-main-js', array(
 			'home_url' => get_home_url(),
@@ -150,8 +242,11 @@ class Simply_Show_Hooks {
 		// Render all the hooks so far
 		$this->render_hooks();
 		
-		// After the header start to write out the hooks as they happen
-		add_action( 'all', array( $this, 'hook_all_hooks' ) );
+		// Add header marker to hooks collection
+		// $this->all_hooks[] = array( 'End Header. Start Body', false, 'marker' );
+		
+		// Change to doing 'write' which will write the hook as it happens
+		$this->doing = 'write';
 	}
 	
 	/**
@@ -159,9 +254,12 @@ class Simply_Show_Hooks {
 	 */
 	function render_hooks() {
 		
-		foreach ( $this->hooks_collection as $nested_key => $nested_value ) {
+		foreach ( $this->all_hooks as $nested_value ) {
 			
-			$this->render_action( $nested_value[0], $nested_value[1] );
+			if ( 'action' == $nested_value['type'] ) {
+				
+				$this->render_action( $nested_value );
+			}
 		}
 	}
 	
@@ -169,26 +267,69 @@ class Simply_Show_Hooks {
 	 * Hook all hooks
 	 */
 	
-	public function hook_all_hooks( $data ) {
+	public function hook_all_hooks( $hook ) {
 		
-		global $wp_actions;
+		global $wp_actions, $wp_filter;
 		
-		if ( isset( $wp_actions[$data] ) && $wp_actions[ $data ] == 1 && ! in_array( $data, $this->ignore_hooks ) ) {
+		if( !in_array( $hook, $this->recent_hooks ) ) {
 			
-			$this->render_action( $data );
+			if ( isset( $wp_actions[$hook] ) ) {
+				
+				// Action
+				$this->all_hooks[] = array(
+					'ID'       => $hook,
+					'callback' => false,
+					'type'     => 'action',
+				);
+			}
+			else {
+				
+				// Filter
+				$this->all_hooks[] = array(
+					'ID'       => $hook,
+					'callback' => false,
+					'type'     => 'filter',
+				);
+			}
 		}
+		
+		//if ( isset( $wp_actions[$hook] ) && $wp_actions[$hook] == 1 && !in_array( $hook, $this->ignore_hooks ) ) {
+		//if (  ( isset( $wp_actions[$hook] ) || isset( $wp_filter[$hook] ) ) && !in_array( $hook, $this->ignore_hooks ) ) {
+		if ( isset( $wp_actions[$hook] ) && !in_array( $hook, $this->recent_hooks ) && !in_array( $hook, $this->ignore_hooks ) ) {
+			
+			// @TODO - caller function testing.
+			$callers = false; // @param $callers Array | false for debug_backtrace()
+			
+			if ( 'write' == $this->doing ) {
+				$this->render_action( end( $this->all_hooks ) );
+			}
+		}
+		else{
+			//s('(skiped-hook!)');
+			//$this->render_action( $hook );
+		}
+		
+		// Discarded functionality: if the hook was 
+		// run recently then don't show it again.
+		// Better to use the once run or always run theory.
+		
+		$this->recent_hooks[] = $hook;
+		
+		if ( count( $this->recent_hooks ) > 100 ) {
+			array_shift( $this->recent_hooks );
+		}	
 	}
 	
 	/**
 	 *
 	 * Render action
 	 */
-	function render_action ( $data, $extra_data = false ) {
+	function render_action( $args = array() ) {
 		
 		global $wp_filter;
 		
 		// Get all the nested hooks
-		$nested_hooks = ( isset( $wp_filter[$data] ) ) ? $wp_filter[$data] : false ;
+		$nested_hooks = ( isset( $wp_filter[ $args['ID'] ] ) ) ? $wp_filter[ $args['ID'] ] : false ;
 		
 		// Count the number of functions on this hook
 		$nested_hooks_count = 0;
@@ -198,16 +339,31 @@ class Simply_Show_Hooks {
 			}
 		}
 		?>
-		<span style="display:none;" class="ssh-action <?php echo ( $nested_hooks ) ? 'ssh-action-has-hooks' : '' ; ?>" >
+		<span style="display:none;" class="ssh-hook ssh-hook-<?php echo $args['type'] ?> <?php echo ( $nested_hooks ) ? 'ssh-hook-has-hooks' : '' ; ?>" >
+			
+			<?php
+			if ( 'action' == $args['type'] ) {
+				?>
+				<span class="ssh-hook-type ssh-hook-type">A</span>
+				<?php
+			}
+			else if ( 'filter' == $args['type'] ) {
+				?>
+				<span class="ssh-hook-type ssh-hook-type">F</span>
+				<?php
+			}
+			?>
+			
 			<?php
 			
 			// Main - Write the action hook name.
-			echo esc_html( $data );
+			//echo esc_html( $args['ID'] );
+			echo $args['ID'];
 			
 			// @TODO - Caller function testing.
-			if ( $extra_data ) {
+			if ( isset( $extra_data[1] ) && FALSE !== $extra_data[1] ) {
 				foreach ( $extra_data as $extra_data_key => $extra_data_value ) {
-					echo '<br>';
+					echo '<br />';
 					echo $extra_data_value['function'];
 				}
 			}
@@ -215,20 +371,24 @@ class Simply_Show_Hooks {
 			// Write the count number if any function are hooked.
 			if ( $nested_hooks_count ) {
 				?>
-				<span class="ssh-action-count">
+				<span class="ssh-hook-count">
 					<?php echo $nested_hooks_count ?>
 				</span>
 				<?php
 			}
 			
 			// Write out list of all the function hooked to an action.
-			if ( isset( $wp_filter[$data] ) ):
+			if ( isset( $wp_filter[$args['ID']] ) ):
 				
-				$nested_hooks = $wp_filter[$data];
+				$nested_hooks = $wp_filter[$args['ID']];
 				
 				if ( $nested_hooks ):
 					?>
-					<ul class="ssh-action-dropdown">
+					<ul class="ssh-hook-dropdown">
+						
+						<li class="ssh-hook-heading">
+							<strong>action:</strong> <?php echo $args['ID']; ?>
+						</li>
 						
 						<?php
 						foreach ( $nested_hooks as $nested_key => $nested_value ) :
@@ -236,7 +396,7 @@ class Simply_Show_Hooks {
 							// Show the priority number if the following hooked functions
 							?>
 							<li class="ssh-priority">
-								<span class="ssh-priority-label"><strong><?php _e('Priority', 'simply-show-hooks') ?></strong> <?php echo $nested_key ?></span>
+								<span class="ssh-priority-label"><strong><?php echo 'Priority:'; /* _e('Priority', 'simply-show-hooks') */ ?></strong> <?php echo $nested_key ?></span>
 							</li>
 							<?php
 							
@@ -301,134 +461,39 @@ class Simply_Show_Hooks {
 	}
 	
 	/*
-	 * Admin Menu top bar
+	 * Filter Hooks Panel
 	 */
-	function admin_bar_menu( $wp_admin_bar ) {
+	function filter_hooks_panel() {
 		
-		if ( $this->status=="show" ) {
-			
-			$title 	= __( 'Hide Hooks' , 'simply-show-hooks' );
-			$href 	= "?ssh-hooks=off";
-			$css 	= "ssh-hooks-on ssh-hooks-normal";
-		}
-		else {
-			
-			$title 	= __( 'Show Hooks' , 'simply-show-hooks' );
-			$href 	= "?ssh-hooks=show";
-			$css 	= "";
-		}
+		global $wp_filter, $wp_actions;
 		
-		$wp_admin_bar->add_menu(array(
-			'title'		=> '<span class="ab-icon"></span><span class="ab-label">' . __( 'Simply Show Hooks' , 'simply-show-hooks' ) . '</span>',
-			'id'		=> "ssh-main-menu",
-			'parent'	=> false,
-			'href'		=> $href,
-		));
-		
-		$wp_admin_bar->add_menu(array(
-			'title'		=> $title,
-			'id'		=> 'ssh-simply-show-hooks',
-			'parent'	=> "ssh-main-menu",
-			'href'		=> $href,
-			'meta'		=> array( 'class' => $css )
-		));
-		
-		/*
-		if ( $this->status=="show-nested" ) {
-			
-			$title	= "Hide Hooks in Sidebar";
-			$href	= "?ssh-hooks=off";
-			$css 	= "ssh-hooks-on ssh-hooks-sidebar";
-		}
-		else {
-			
-			$title	= "Simply Show Hooks in Sidebar";
-			$href	= "?ssh-hooks=show-nested";
-			$css 	= "";
-		}
-		
-		$wp_admin_bar->add_menu(array(
-			'title'		=> $title,
-			'id'		=> 'ssh-show-all-hooks',
-			'parent'	=> "ssh-main-menu",
-			'href'		=> $href,
-			'meta'		=> array( 'class' => $css )
-		));
-		*/
-	}
-	
-	// Custom css to add icon to admin bar edit button.
-	function add_builder_edit_button_css() {
 		?>
-		<style>
-		#wp-admin-bar-ssh-main-menu .ab-icon:before{
-			font-family: "dashicons" !important;
-			content: "\f323" !important;
-			font-size: 16px !important;
-		}
-		</style>
-		<?php
-	}
-
-	/*
-	 * Notification Switch
-	 * Displays notification interface that will alway display
-	 * even if the interface is corrupted in other places.
-	 */
-	function notification_switch( $data ) {
-		?>
-		<a class="ssh-notification-switch" href="?ssh-hooks=off" >
-			<span class="ssh-notification-indicator"></span>
-			<?php _e( 'Hide Hooks' , 'simply-show-hooks' ) ?>
-		</a>
-		<?php
-	}
-	
-	/*
-	 * Build a collection of all the hooks to display in one big clump - discarded
-	 */
-	
-	public function build_hooks_collection( $data ) {
-
-		global $wp_actions, $wp_filter, $recent_hooks;
-		
-		if ( $this->status != "off" ) {
-			
-			//Get all the nested hooks
-			$nested_hooks = ( isset( $wp_filter[$data] ) ) ? $wp_filter[$data] : false ;
-			
-			//Count the number of functions on this hook
-			$nested_hooks_count = 0;
-			
-			if ( $nested_hooks ) {
-				foreach ($nested_hooks as $key => $value) {
-					$nested_hooks_count += count($value);
+		<div class="ssh-nested-hooks-block <?php echo ( 'show-filter-hooks' == $this->status ) ? 'ssh-active' : '' ; ?> ">
+			<?php
+			foreach ( $this->all_hooks as $va_nested_value ) {
+				
+				if ( 'action' == $va_nested_value['type'] || 'filter' == $va_nested_value['type'] ) {
+					$this->render_action( $va_nested_value );
 				}
-			}
-			
-			/*
-			// Discarded functionality: if the hook was
-			// run recently then don't show it again.
-			// Better to use the once run or always run theory.
-			if ( !isset( $recent_hooks ) ) $recent_hooks = array();
-			if ( count( $recent_hooks ) > 10 ) {
-				array_shift( $recent_hooks );
-			}
-			*/
-			
-			if ( isset( $wp_actions[$data] ) && $wp_actions[$data] == 1 && !in_array( $data, $this->ignore_hooks ) ) {
+				else{
+					?>
+					<div class="ssh-collection-divider">
+						<?php echo $va_nested_value['ID'] ?>
+					</div>
+					<?php
+				}
 				
-				// @TODO - caller function testing.
-				//$callers = debug_backtrace();
-				
-				$callers = false;
-				
-				$this->hooks_collection[] = array(
-					$data,
-					$callers //Array | false
-				);
+				/*
+				?>
+				<div class="va-action">
+					<?php echo $va_nested_value ?>
+				</div>
+				<?php
+				*/
 			}
-		}
+			?>
+		</div>
+		<?php
 	}
 
 }

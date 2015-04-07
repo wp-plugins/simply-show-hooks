@@ -1,12 +1,12 @@
 
-.ssh-action {
+.ssh-hook {
 	position: relative;
 	clear: both;
 	width: auto !important;
 	float: none !important;
 	min-width: 0px !important;
 	min-height: 0px !important;
-	border: 1px solid rgba(0, 0, 0, 0.14) !important;
+	border: 1px solid rgba(0, 0, 0, 0.15) !important;
 	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.1) inset, 0px 1px 1px rgba(0, 0, 0, 0.15) !important;
 	color: #EEEEEE !important;
 	text-decoration: none !important;
@@ -24,12 +24,60 @@
 	white-space: nowrap !important;
 	box-sizing: initial !important;
 }
-.ssh-action.ssh-action-has-hooks {
-	background: #34B08D !important;
-	cursor: pointer;
-	color: #F6F6F6 !important;
+.ssh-hook.ssh-hook-action {
+	background: #D1E8E0 !important;
+	color: #2E2E2E !important;
+	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px 1px rgba(0, 0, 0, 0.05) !important;
 }
-.ssh-action .ssh-action-count {
+.ssh-hook.ssh-hook-filter {
+	background: #E8D8D3 !important;
+	color: #3A2D2D !important;
+	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px 1px rgba(0, 0, 0, 0.05) !important;
+}
+.ssh-hook .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.13) !important;
+	border-radius: 30px !important;
+	min-width: 11px !important;
+	line-height: 11px !important;
+	padding-top: 0px !important;
+	display: inline-block !important;
+	text-align: center !important;
+	color: rgba(8, 8, 8, 0.9) !important;
+	font-size: 9px !important;
+	margin: 0px !important;
+	float: none !important;
+}
+.ssh-hook.ssh-hook-action .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.2) !important;
+	color: rgba(199, 255, 212, 1) !important;
+}
+.ssh-hook.ssh-hook-filter .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.15) !important;
+	color: #F4E1E1 !important;
+}
+.ssh-hook.ssh-hook-action.ssh-hook-has-hooks .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.2) !important;
+	color: #4DCCA8 !important;
+}
+.ssh-hook.ssh-hook-filter.ssh-hook-has-hooks .ssh-hook-type{
+	background: rgba(0, 0, 0, 0.25) !important;
+	color: rgba(196, 131, 131, 1) !important;
+}
+.ssh-hook.ssh-hook-has-hooks {
+	cursor: pointer;
+}
+.ssh-hook.ssh-hook-action.ssh-hook-has-hooks {
+	background: #34B08D !important;
+	color: #F6F6F6 !important;
+	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px 1px rgba(0, 0, 0, 0.17) !important;
+}
+.ssh-hook.ssh-hook-filter.ssh-hook-has-hooks {
+	background: #AB325B !important;
+	box-shadow: 0px 1px 1px rgba(255, 255, 255, 0.3) inset, 0px 1px 1px rgba(0, 0, 0, 0.17) !important;
+	color: #FFF !important;
+}
+
+.ssh-hook .ssh-hook-count {
 	float:none !important;
 	min-width: 14px !important;
 	min-height:0 !important;
@@ -50,7 +98,7 @@
 	color: rgba(255, 255, 255, 0.95) !important;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
 }
-.ssh-action .ssh-action-dropdown {
+.ssh-hook .ssh-hook-dropdown {
 	position: absolute;
 	z-index: 100000;
 	line-height: 12px;
@@ -68,7 +116,7 @@
 	overflow: visible !important;
 	top: 100%;
 }
-.ssh-action .ssh-action-dropdown:after {
+.ssh-hook .ssh-hook-dropdown:after {
 	display:block;
 	content:'';
 	width: 0;
@@ -83,7 +131,7 @@
 	left: 30px;
 	opacity: 1 !important;
 }
-.ssh-action .ssh-action-dropdown:before {
+.ssh-hook .ssh-hook-dropdown:before {
 	display:block;
 	content:'';
 	width: 0;
@@ -98,9 +146,8 @@
 	margin-left:-1px;
 	left: 30px;
 }
-.ssh-action ul.ssh-action-dropdown {
-}
-.ssh-action ul.ssh-action-dropdown li span.ssh-function-string {
+.ssh-hook ul.ssh-hook-dropdown {}
+.ssh-hook ul.ssh-hook-dropdown li span.ssh-function-string {
 	position: relative;
 	width: auto !important;
 	float: none !important;
@@ -121,13 +168,17 @@
 	transition: .5s !important;
 	white-space: nowrap !important;
 }
-.ssh-action ul.ssh-action-dropdown li span:before {
+.ssh-hook.ssh-hook-filter ul.ssh-hook-dropdown li span.ssh-function-string {
+	box-shadow: 0px 1px 0 rgba(255, 255, 255, 0.2) inset, 0px 1px 1px rgba(0, 0, 0, 0.2) !important;
+	background: #AB325B !important;
+}
+.ssh-hook ul.ssh-hook-dropdown li span:before {
 	display: none !important;
 }
-.ssh-action ul.ssh-action-dropdown li span:after {
+.ssh-hook ul.ssh-hook-dropdown li span:after {
 	display:none !important;
 }
-.ssh-action ul.ssh-action-dropdown li {
+.ssh-hook ul.ssh-hook-dropdown li {
 	display:block;
 	padding: 2px 0 2px 0;
 	position: relative;
@@ -137,14 +188,23 @@
 	width: auto !important;
 	float: none !important;
 }
-.ssh-action ul.ssh-action-dropdown li.ssh-priority {
+.ssh-hook ul.ssh-hook-dropdown li.ssh-hook-heading {
+	padding: 1px 0;
+	background: rgba(231, 231, 231, 0.46);
+	margin: 10px 0 20px;
+	font-size: 13px;
+	padding: 12px 9px;
+	border: 1px solid rgba(0, 0, 0, 0.07);
+	border-radius: 3px;
+}
+.ssh-hook ul.ssh-hook-dropdown li.ssh-priority {
 	display:block;
 	height: 1px;
 	padding:0;
 	margin: 16px 0 10px;
 	border-bottom: 1px solid #F4F4F4;
 }
-.ssh-action ul.ssh-action-dropdown li span.ssh-priority-label {
+.ssh-hook ul.ssh-hook-dropdown li span.ssh-priority-label {
 	display: inline-block;
 	background: #FFFFFF;
 	border-radius: 50px;
@@ -158,16 +218,16 @@
 	top: -7px;
 	left: 0px;
 }
-.ssh-action ul.ssh-action-dropdown li span.ssh-priority-label:after{
+.ssh-hook ul.ssh-hook-dropdown li span.ssh-priority-label:after{
 	content:"" !important;
 }
-.ssh-action ul.ssh-action-dropdown li span.ssh-priority-label:before{
+.ssh-hook ul.ssh-hook-dropdown li span.ssh-priority-label:before{
 	content:"" !important;
 }
-.ssh-action ul.ssh-action-dropdown li span.ssh-priority-label strong {
+.ssh-hook ul.ssh-hook-dropdown li span.ssh-priority-label strong {
 	font-weight:bold;
 }
-.ssh-action ul.ssh-action-dropdown li ul {
+.ssh-hook ul.ssh-hook-dropdown li ul {
 	display:none;
 	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) inset, 0 2px 9px rgba(0, 0, 0, 0.21);
 	border-radius: 3px;
@@ -179,27 +239,30 @@
 	left: 15px;
 	pointer-events: none;
 }
-.ssh-action ul.ssh-action-dropdown li ul li {
-}
-.ssh-action ul.ssh-action-dropdown li:hover ul {
+.ssh-hook ul.ssh-hook-dropdown li ul li {}
+.ssh-hook ul.ssh-hook-dropdown li:hover ul {
 	display:block;
+}
+
+.ssh-collection-divider{
+	/* background:red;
+*/
+	margin: 1px 2px;
+	padding: 10px 0;
+	font-size: 12px;
+	font-weight: bold;
 }
 
 /*Pulse Animation*/
 @-webkit-keyframes ssh-pulse {
-	
-	0% {
-		opacity:0;
-	}
-	100% {
-		opacity:1;
-	}
-}
+0% {
+	opacity:0;
+} 100% {
+	opacity:1;
+} }
 
-.ssh-action .ssh-action-dropdown pre {
-/* white-space: pre-wrap;
-*/}
-.ssh-action:hover .ssh-action-dropdown {
+.ssh-hook .ssh-hook-dropdown pre {}
+.ssh-hook:hover .ssh-hook-dropdown {
 	display:block !important;
 }
 
@@ -247,14 +310,12 @@
 	background: rgba(255, 255, 255, 0.11);
 }
 
-.ssh-hooks-on {
-}
+.ssh-hooks-on {}
 
-#wpadminbar .ssh-hooks-on .ab-item:before {
+#wp-admin-bar-ssh-main-menu .ab-submenu .ab-item:before  {
 	line-height: 11px;
 	display:inline-block;
-	background-color: #b7ed00;
-	-webkit-animation: ssh-pulse 1s infinite alternate;
+	background-color: rgba(146, 146, 146, 1);
 	width: 11px;
 	height: 3px;
 	display: inline-block;
@@ -265,6 +326,11 @@
 	content: "" !important;
 	clear: both;
 	display: inline-block;
+	/* border: 2px solid #8B8B8B;
+*/}
+#wp-admin-bar-ssh-main-menu .ab-submenu .ssh-hooks-on .ab-item:before {
+	background-color: #b7ed00;
+	-webkit-animation: ssh-pulse 1s infinite alternate;
 }
 
 .ssh-nested-hooks-block {
@@ -272,18 +338,19 @@
 	background: white;
 	position: fixed;
 	left: 0;
-	top: 32px;
-	z-index: 1000;
-	width: 400px;
+	top: 0;
+	z-index: 100000;
+	width: 385px;
 	height: 100%;
 	overflow-y: scroll;
 	overflow-x: hidden;
-	box-shadow: 0 1px 15px rgba(0, 0, 0, 0.3);
+	box-shadow: 6px 0px 0px rgba(0, 0, 0, 0.05), 0 1px 15px rgba(0, 0, 0, 0.3);
 	border-right: 1px solid rgba(0, 0, 0, 0.24);
+	padding: 3px;
 }
 .ssh-nested-hooks-block.ssh-active {
 	display:block;
 }
-.ssh-nested-hooks-block .ssh-action {
+.ssh-nested-hooks-block .ssh-hook {
 	max-width: 380px;
 }
