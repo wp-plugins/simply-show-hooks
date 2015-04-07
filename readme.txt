@@ -46,3 +46,6 @@ Please note that in odd cases, due to the nature of actions and filters, the plu
 * Added a hook name heading to the dropdown menu to easier identify, copy and use the hooks.
 * Added an A and F to identify whether a hook is an Actions and Filter.
 * Changed the color of the Actions and Filters hook markers.
+
+= 1.1.1 =
+* Fixed small typo showing Filter as Action in heading.
