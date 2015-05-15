@@ -1,6 +1,5 @@
 === Simply Show Hooks ===
-Author: stuartobrien
-Contributors: cxthemes, obox
+Contributors: stuartobrien, cxthemes, obox
 Donate Link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=SDPYLC54KALRL
 Tags: hook, action, filter, add, do, add_action, add_filter, do_action, apply_filter, developer, code, find, admin
 Requires at least: 3
